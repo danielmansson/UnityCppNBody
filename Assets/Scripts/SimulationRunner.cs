@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 
 public class SimulationRunner : MonoBehaviour
@@ -55,7 +56,8 @@ public class SimulationRunner : MonoBehaviour
 	{
 		Native,
 		Managed,
-		Unsafe
+		Unsafe,
+		Pain
 	}
 
 	void CreateSimulation(SimulationType type, int count)
@@ -70,6 +72,8 @@ public class SimulationRunner : MonoBehaviour
 			m_simulation = new NativeSimulation();
 		else if (type == SimulationType.Managed)
 			m_simulation = new ManagedSimulation();
+		else if(type == SimulationType.Pain)
+			m_simulation = new ManagedPainSimulation();
 		else
 			m_simulation = new UnsafeManagedSimulation();
 
@@ -143,35 +147,16 @@ public class SimulationRunner : MonoBehaviour
 			}
 		}
 
-		using (new GUILayout.HorizontalScope())
+		foreach (var type in System.Enum.GetValues(typeof(SimulationType)).Cast<SimulationType>())
 		{
-			foreach (var count in new int[] { 10, 100, 200, 400, 800, 1600, 2400 })
+			using (new GUILayout.HorizontalScope())
 			{
-				if (GUILayout.Button("Managed " + count))
+				foreach (var count in new int[] { 10, 100, 200, 400, 800, 1600, 2400 })
 				{
-					CreateSimulation(SimulationType.Managed, count);
-				}
-			}
-		}
-
-		using (new GUILayout.HorizontalScope())
-		{
-			foreach (var count in new int[] { 10, 100, 200, 400, 800, 1600, 2400 })
-			{
-				if (GUILayout.Button("Unsafe " + count))
-				{
-					CreateSimulation(SimulationType.Unsafe, count);
-				}
-			}
-		}
-
-		using (new GUILayout.HorizontalScope())
-		{
-			foreach (var count in new int[] { 10, 100, 200, 400, 800, 1600, 2400 })
-			{
-				if (GUILayout.Button("Native " + count))
-				{
-					CreateSimulation(SimulationType.Native, count);
+					if (GUILayout.Button(type.ToString() + " " + count))
+					{
+						CreateSimulation(type, count);
+					}
 				}
 			}
 		}
