@@ -325,7 +325,7 @@ namespace NativeScript
 			{
 				var handleValue = PlayerPrefs.GetInt("LibraryPointer", 0);
 
-				if(handleValue != 0)
+				if (handleValue != 0)
 				{
 					var handle = new IntPtr(handleValue);
 					CloseLibrary(handle);
@@ -352,13 +352,6 @@ namespace NativeScript
 				Marshal.GetFunctionPointerForDelegate(new SetExceptionDelegate(SetException))
 				);
 
-			var a = Marshal.ReadByte(memory, 0);
-			a = Marshal.ReadByte(memory, 1);
-			a = Marshal.ReadByte(memory, 10);
-			a = Marshal.ReadByte(memory, 21);
-
-			LookAtMemory();
-
 			if (UnhandledCppException != null)
 			{
 				Exception ex = UnhandledCppException;
@@ -367,39 +360,6 @@ namespace NativeScript
 			}
 
 			s_isInit = true;
-		}
-
-		struct Body
-		{
-			public Vector2 pos;
-			public Vector2 vel;
-			public Vector2 acc;
-			public float size;
-		}
-
-		unsafe struct GameState
-		{
-			public int count;
-			public Body* bodies;
-		}
-
-		static unsafe void LookAtMemory()
-		{
-			/*
-			GameState* state = (GameState*)memory.ToPointer();
-
-			state->count = 5;
-
-			for (int i = 0; i < state->count; i++)
-			{
-				state->bodies[i] = new Body()
-				{
-					pos = UnityEngine.Random.insideUnitCircle * 10f,
-					vel = UnityEngine.Random.insideUnitCircle,
-					acc = Vector2.zero,
-					size = 1f
-				};
-			}*/
 		}
 
 		/// <summary>
@@ -422,11 +382,11 @@ namespace NativeScript
 			File.Delete(pluginTempPath);
 #endif
 		}
-		
+
 		////////////////////////////////////////////////////////////////
 		// C# functions for C++ to call
 		////////////////////////////////////////////////////////////////
-		
+
 		[MonoPInvokeCallback(typeof(SetExceptionDelegate))]
 		static void SetException(int code)
 		{
