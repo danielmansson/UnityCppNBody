@@ -4,15 +4,14 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 public class UpdateForceSystem : JobComponentSystem
 {
 	NativeArray<float3> positions;
-	ComponentGroup bodyGroup;
+	private EntityQuery bodyGroup;
 
-	//[BurstCompile]
-	struct Job : IJobProcessComponentDataWithEntity<Force, Translation, Velocity>
+	[BurstCompile]
+	struct Job : IJobForEachWithEntity<Force, Translation, Velocity>
 	{
 		public float deltaTime;
 		public float gravityFactor;
@@ -50,8 +49,8 @@ public class UpdateForceSystem : JobComponentSystem
 		}
 	}
 
-	//[BurstCompile]
-	struct CopyPositionsJob : IJobProcessComponentDataWithEntity<Translation>
+	[BurstCompile]
+	struct CopyPositionsJob : IJobForEachWithEntity<Translation>
 	{
 		public NativeArray<float3> positions;
 
@@ -63,7 +62,7 @@ public class UpdateForceSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
-		var bodyCount = bodyGroup.CalculateLength();
+		var bodyCount = bodyGroup.CalculateEntityCount();
 
 		var copyPositionsJob = new CopyPositionsJob()
 		{
@@ -73,7 +72,7 @@ public class UpdateForceSystem : JobComponentSystem
 
 		var updateForceJob = new Job()
 		{
-			deltaTime = Time.deltaTime,
+			deltaTime = UnityEngine.Time.deltaTime,
 			gravityFactor = 1f / bodyCount,
 			positions = positions,
 			bodyCount = bodyCount
@@ -88,14 +87,20 @@ public class UpdateForceSystem : JobComponentSystem
 		base.OnStopRunning();
 	}
 
-	protected override void OnCreateManager()
+
+	protected override void OnCreate()
 	{
 		positions = new NativeArray<float3>(10000, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-		bodyGroup = GetComponentGroup(new EntityArchetypeQuery
+
+		var query = new EntityQueryDesc()
 		{
 			All = new[] { ComponentType.ReadOnly<Translation>() },
-			Options = EntityArchetypeQueryOptions.FilterWriteGroup
-		});
+			Options = EntityQueryOptions.FilterWriteGroup
+		};
+
+		bodyGroup = GetEntityQuery(query);
+
+		base.OnCreate();
 	}
 }
 

@@ -1,15 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine;
 
 public class UpdateVelocitySystem : JobComponentSystem
 {
-	struct Job : IJobProcessComponentDataWithEntity<Velocity, Force>
+	[BurstCompile]
+	struct Job : IJobForEachWithEntity<Velocity, Force>
 	{
 		public float deltaTime;
 
@@ -23,7 +20,7 @@ public class UpdateVelocitySystem : JobComponentSystem
 	{
 		var job = new Job()
 		{
-			deltaTime = Time.deltaTime,
+			deltaTime = UnityEngine.Time.deltaTime,
 		};
 
 		return job.Schedule(this, inputDeps);

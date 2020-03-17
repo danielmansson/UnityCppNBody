@@ -10,8 +10,10 @@ public class Spawner : MonoBehaviour
 
 	void Start()
 	{
-		Entity entityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, World.Active);
-		var entityManager = World.Active.EntityManager;
+		var assetStore = new BlobAssetStore();
+		var settings = GameObjectConversionSettings.FromWorld(World.DefaultGameObjectInjectionWorld, assetStore);
+		Entity entityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(prefab, settings);
+		var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
 		for (int i = 0; i < count; i++)
 		{
@@ -21,5 +23,7 @@ public class Spawner : MonoBehaviour
 			entityManager.AddComponentData(instance, new Velocity { Value = (Vector3)UnityEngine.Random.insideUnitCircle });
 			entityManager.AddComponentData(instance, new Force { Value = Vector3.zero });
 		}
+
+		assetStore.Dispose();
 	}
 }
